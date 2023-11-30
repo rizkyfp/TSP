@@ -156,6 +156,23 @@ def visualize_tsp_tour_with_distances(points, tour):
     st.pyplot()
 
 
+# Function to extract all routes for each possible starting point using nearest insertion
+def extract_all_routes_nearest_insertion(points):
+    all_routes = []
+
+    # Iterate through all possible starting points
+    for starting_index, starting_point in enumerate(points):
+        # Find the nearest insertion tour
+        tour, total_distance = nearest_insertion(points[starting_index:] + points[:starting_index])
+
+        # Add the starting point to the best tour indices
+        best_tour_indices = [(points.index(p) + 1) for p in tour]
+
+        # Store the route in the list
+        all_routes.append((best_tour_indices, total_distance))
+
+    return all_routes
+
 # Streamlit UI
 def main():
     st.title("TSP Solver with Streamlit")
@@ -171,7 +188,7 @@ def main():
         st.subheader("Uploaded Data:")
         st.write(df)
 
-        # Extract all routes
+        # Extract all routes for nearest neighbor
         points = list(zip(df['X'], df['Y']))
         all_routes_nn = extract_all_routes(points)
 
@@ -187,21 +204,20 @@ def main():
 
         visualize_tsp_tour_with_distances(points, best_route_nn[0])
 
-        # Find the optimal tour using nearest insertion
-        optimal_tour, optimal_distance = nearest_insertion(points)
-
-        # Add the starting point to the best tour indices
-        best_tour_indices = [points.index(p) + 1 for p in optimal_tour]
+        # Extract all routes for nearest insertion
+        all_routes_insertion = extract_all_routes_nearest_insertion(points)
 
         # Summarize routes in a DataFrame for nearest insertion
-        routes_df_insertion = pd.DataFrame([(best_tour_indices, optimal_distance)], columns=['Tour', 'Total Distance'])
+        routes_df_insertion = pd.DataFrame(all_routes_insertion, columns=['Tour', 'Total Distance'])
         st.subheader("Summarized Routes (Nearest Insertion):")
         st.dataframe(routes_df_insertion)
 
+        # Visualize the best route from nearest insertion algorithm
+        best_route_insertion = all_routes_insertion[routes_df_insertion['Total Distance'].idxmin()]
         st.subheader("Best Route (Nearest Insertion):")
-        st.write(f"Tour Indices: {best_tour_indices} with distance: {optimal_distance}")
+        st.write(f"Tour: {best_route_insertion[0]} with distance: {best_route_insertion[1]}")
 
-        visualize_tsp_tour_with_distances(points, best_tour_indices)
+        visualize_tsp_tour_with_distances(points, best_route_insertion[0])
 
 if __name__ == "__main__":
     main()
