@@ -177,6 +177,7 @@ def extract_all_routes_nearest_insertion(points):
 # Streamlit UI
 def main():
     st.title("TSP Solver with Streamlit")
+    st.write("Rizky Ferdiansyah     6003221028")
 
     st.sidebar.header("Upload Data")
     uploaded_file = st.sidebar.file_uploader("Choose an XLSX file", type="xlsx")
